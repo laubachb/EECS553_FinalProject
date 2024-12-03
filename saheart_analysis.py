@@ -37,6 +37,7 @@ epochs = 1000
 # Generate and fit model
 net = train.Encoder()
 optimizer = optimize.Adam(net.parameters(), lr = 0.001)
-trainloader_SemanticMask = torch.utils.data.DataLoader(train_dataset,batch_size=151)  
-net,training_loss = train.train_dnn(net,0.01,1000,optimizer,train_dataset)
+trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=151)  
+print(type(data_train))
+net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
  
