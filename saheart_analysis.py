@@ -1,5 +1,5 @@
 import numpy as np
-from SemanticMask_Datasets import SMDataset_labeled, SMDataset_unlabeled
+from SemanticMask_Datasets import SMDataset_withClusters, SMDataset
 
 # Load in SA Heart Data from .npy files
 # Load in cluster assignments generated using the following files:
@@ -14,10 +14,10 @@ cluster_assignment = np.load('data/saheart_clusters.npy')
 
 # Create torch dataset objects for train and test sets using the following files:
 # - SemanticMask_Datasets.py
-data_train_sm = SMDataset_labeled(X_train,y_train,cluster_assignment)
-data_train = SMDataset_unlabeled(X_train, y_train)
-data_test = SMDataset_unlabeled(X_test, y_test)
-data_validation = SMDataset_unlabeled(X_valid, y_valid)
+data_train_sm = SMDataset_withClusters(X_train,y_train,cluster_assignment)
+data_train = SMDataset(X_train, y_train)
+data_test = SMDataset(X_test, y_test)
+data_validation = SMDataset(X_valid, y_valid)
 
 # Load in datasets using torch
 train_dataset = torch.utils.data.DataLoader(dataset=data_train,batch_size=151)
