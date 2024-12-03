@@ -11,6 +11,6 @@ class SMDataset_labeled(Dataset):
 
 class SMDataset_unlabeled(Dataset):
     # Initialize a dataset based on X, y 
-    def __init__(self, X, y, cluster_assignment):
+    def __init__(self, X, y):
         self.X = torch.from_numpy(X)
         self.y = torch.from_numpy(y)
