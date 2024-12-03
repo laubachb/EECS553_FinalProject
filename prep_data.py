@@ -2,53 +2,50 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-def prep_pima():
-    # read the CSV file into a Pandas DataFrame
-    data = pd.read_csv("diabetes.csv")
-    X = data.iloc[:, :-1].values  # all rows, all but the last column
-    y = data.iloc[:, -1].values   # all rows, only the last column (labels)
-    print("Dataset size:", X.shape)
-    
-    # Separate positive and negative samples
-    normal_samples = X[y == 0]  # Negative diagnoses
-    anomal_samples = X[y == 1]  # Positive diagnoses
-    print("Number of negative samples:", normal_samples.shape)
-    print("Number of positive samples:", anomal_samples.shape)
-    
-    # Randomly shuffle negative samples and divide into train, validate, and test
-    idx = np.random.permutation(normal_samples.shape[0])  
-    normal_samples = normal_samples[idx]
-    num_train = len(normal_samples) // 2   # split the training set in half
-    x_train = normal_samples[:num_train]    
+def process_dataset(dataset, train_split = 0.50, validation_split = 0.25): # predefined splits according to paper 
+    if dataset == 'saheart':
+        print('Removing text-based descriptors from SAheat dataset')
+        df = pd.read_csv("saheart.txt", skiprows=14, header=None)
+        # Replace 'Present' with 1 and 'Absent' with 0 in the DataFrame
+        df.replace({'Present': 1, 'Absent': 0}, inplace=True)
+    else:
+        # Read the CSV file into a Pandas DataFrame
+        df = pd.read_csv("diabetes.csv")
 
-    np.random.shuffle(normal_samples)
-    num_train = len(normal_samples) // 2
-    x_train = normal_samples[:num_train]
+    # Separate features (X) and target (y)
+    X = df.iloc[:, :-1].values  # All columns except the last one (features)
+    y = df.iloc[:, -1].values   # Last column (target/labels)
+
+    # Separate positive and negative samples
+    normal_data = X[y == 0]  # Negative diagnoses
+    anomalies = X[y == 1]  # Positive diagnoses
     
-    num_validate = len(normal_samples[num_train:]) // 2
-    x_validate = normal_samples[num_train:num_train + num_validate]
-    x_test = normal_samples[num_train + num_validate:]
+    # randomly shuffle data 
+    np.random.seed(42) 
+    idx = np.random.permutation(normal_data.shape[0]) 
+    normal_data = normal_data[idx] 
+
+    # split dataset into train, validate test 
+    num_train = int(train_split * len(normal_data))
+    x_train = normal_data[:num_train]    
+    num_validate = int(validation_split * len(normal_data))
+    x_validate = normal_data[num_train:][:num_validate]
+    x_test = normal_data[num_train:][num_validate:]
     
     # Combine and scale the train + validate samples
-    x_in = np.concatenate([x_train, x_validate])
-    scaler = MinMaxScaler().fit(x_in)
-    x_in = scaler.transform(x_in)
-    
-    # Prepare test data
-    x_test = np.concatenate([x_test, anomal_samples])
-    x_test = scaler.transform(x_test)
+    x_train_validate = np.concatenate([x_train, x_validate])
+    scaler = MinMaxScaler().fit(x_train_validate)
+    x_train_validate = scaler.transform(x_train_validate)
     
     # Split the scaled data back into train and validate
-    x_train = x_in[:len(x_train)]
+    x_train = x_train_validate[:len(x_train)]
     y_train = np.zeros(len(x_train))
-    
-    x_valid = x_in[len(x_train):]
-    y_valid = np.zeros(len(x_valid))
+    x_validate = x_train_validate[len(x_train):]
+    y_validate = np.zeros(len(x_validate))
     
     # Prepare test labels
-    y_test = np.concatenate([np.zeros(len(x_test) - len(anomal_samples)), np.ones(len(anomal_samples))])
+    x_test = np.concatenate([x_test, anomalies])
+    x_test = scaler.transform(x_test)
+    y_test = np.concatenate([np.zeros(len(x_test)), np.ones(len(anomalies))]) 
     
-    return x_train, y_train, x_valid, y_valid, x_test, y_test
-
-# Call the refactored function
-x_train, y_train, x_valid, y_valid, x_test, y_test = prep_pima()
+    return x_train, y_train, x_validate, y_validate, x_test, y_test
