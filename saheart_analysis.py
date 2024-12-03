@@ -3,6 +3,7 @@ import torch
 import train
 import torch.optim as optimize
 from SemanticMask_Datasets import SMDataset_withClusters, SMDataset
+import evaluation
 
 # Load in SA Heart Data from .npy files
 # Load in cluster assignments generated using the following files:
@@ -30,9 +31,6 @@ validation_dataset = torch.utils.data.DataLoader(dataset=data_validation,batch_s
 # Fit NN model using the following files:
 # - train.py
 # - Loss.py
-# Hyperparameters
-temperature = 0.01
-epochs = 1000
 
 # Generate and fit model
 net = train.Encoder()
@@ -40,4 +38,6 @@ optimizer = optimize.Adam(net.parameters(), lr = 0.001)
 trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=151)  
 print(type(data_train))
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
- 
+
+auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print(auroc)

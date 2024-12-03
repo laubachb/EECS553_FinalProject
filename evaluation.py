@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
+from numpy.linalg import det
 
 
 def get_features(model, dataloader):
@@ -80,7 +81,7 @@ def evaluate(net,trainloader,validloader,testloader):
             #print("percentile:",percentile)
             cutoff = np.percentile(distances,percentile)
             pred = distances_test > cutoff
-            pred = pred.astype(np.int)
+            pred = pred.astype(int)
             for i in labels:
                 y_true.append(i.item())
             for i in pred:
