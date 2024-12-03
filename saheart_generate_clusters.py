@@ -35,3 +35,5 @@ cluster_assignment = clustering_model.labels_
 # Print the cluster assignments as a NumPy array
 # This shows which column name is assigned to which cluster (0 or 1)
 np.save('data/saheart_clusters.npy', cluster_assignment)  
+
+
