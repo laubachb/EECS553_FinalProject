@@ -5,16 +5,17 @@ from sklearn.preprocessing import MinMaxScaler
 def process_dataset(dataset, train_split = 0.50, validation_split = 0.25): # predefined splits according to paper 
     if dataset == 'saheart':
         print('Removing text-based descriptors from SAheat dataset')
-        df = pd.read_csv("saheart.txt", skiprows=14, header=None)
+        df = pd.read_csv("saheart_data/saheart.txt", skiprows=14, header=None)
         # Replace 'Present' with 1 and 'Absent' with 0 in the DataFrame
         df.replace({'Present': 1, 'Absent': 0}, inplace=True)
     else:
         # Read the CSV file into a Pandas DataFrame
-        df = pd.read_csv("diabetes.csv")
+        df = pd.read_csv("pima_data/diabetes.csv")
 
     # Separate features (X) and target (y)
     X = df.iloc[:, :-1].values  # All columns except the last one (features)
     y = df.iloc[:, -1].values   # Last column (target/labels)
+    print(f'Datatset size: {X.shape}')
 
     # Separate positive and negative samples
     normal_data = X[y == 0]  # Negative diagnoses
