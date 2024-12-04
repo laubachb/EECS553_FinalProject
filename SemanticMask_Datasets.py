@@ -89,7 +89,6 @@ class SMDataset_Description(Dataset):
             index = index.tolist()
         X_index = self.X[index]
         y_index = self.y[index]
-        pm = self.pm
         cluster_assignment = self.cluster_assignment # f_label in source code
         reduced_cluster = list(set(cluster_assignment)) # f_cluster in source code
         number = len(reduced_cluster) // 2
