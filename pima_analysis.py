@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import train_pima
 import torch.optim as optimize
-from SemanticMask_Datasets import SMDataset_withClusters, SMDataset
+from SemanticMask_Datasets import SMDataset_withClusters, SMDataset, SMDataset_Description
 import evaluation
 import prep_data
 
@@ -25,6 +25,7 @@ y_valid = np.load('pima_data/y_valid_pima.npy')
 X_test = np.load('pima_data/X_test_pima.npy')   
 y_test = np.load('pima_data/y_test_pima.npy')
 cluster_assignment = np.load('pima_data/pima_clusters.npy')
+cluster_assignment_description = np.load('pima_data/pima_clusters_description.npy')
 
 # Create torch dataset objects for train and test sets using the following files:
 # - SemanticMask_Datasets.py
@@ -48,7 +49,18 @@ optimizer = optimize.Adam(net.parameters(), lr = 0.001)
 trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=151)  
 net, training_loss = train_pima.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
 
-
 auroc, pr_auc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
-print(auroc)
-print(pr_auc)
+print("AUROC: ", auroc)
+print("PRAUC: ", pr_auc)
+
+# Generate and fit model with SemanticMask+Description
+data_train_description = SMDataset_Description(X_train, y_train, cluster_assignment_description)
+trainloader_description = torch.utils.data.DataLoader(data_train_description, batch_size=151) 
+net = train_pima.Encoder()
+optimizer = optimize.Adam(net.parameters(), lr = 0.001)
+trainloader_SemanticMask_description = torch.utils.data.DataLoader(data_train_description, batch_size=151)  
+net,training_loss = train_pima.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask_description)
+auroc_d, pr_auc_d = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print("AUCROC(SemanticMask+Description):", auroc_d)
+print("PR-AUC(SemanticMask+Description):", pr_auc_d)
+

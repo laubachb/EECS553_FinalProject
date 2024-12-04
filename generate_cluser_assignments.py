@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 
 dataset = 'pima' # saheart or pima 
-description = True
+description = False
 
 if dataset == 'saheart':
     # Define a list of column names related to health and medical data for the SAHeart dataset 
@@ -34,6 +34,8 @@ elif dataset == 'pima':
         "diabetes pedigree function",  
         "age" 
         ]
+    if description == True:
+        column_names.insert(0, "The task is to predict if a patient has diabetes.")
 
 # Initialize the SentenceTransformer model with a pre-trained BERT model
 embedder = SentenceTransformer('bert-base-nli-stsb-mean-tokens')
@@ -60,4 +62,8 @@ if dataset == 'saheart':
         np.save('data/saheart_clusters.npy', cluster_assignment)  
 
 if dataset == 'pima':
-    np.save('pima_data/pima_clusters.npy', cluster_assignment)
+    if description == True:
+        np.save('pima_data/pima_clusters_description.npy', cluster_assignment)
+    else:
+        np.save('pima_data/pima_clusters.npy', cluster_assignment)  
+        
