@@ -8,6 +8,10 @@ def process_dataset(dataset, train_split = 0.50, validation_split = 0.25): # pre
         df = pd.read_csv("saheart_data/saheart.txt", skiprows=14, header=None)
         # Replace 'Present' with 1 and 'Absent' with 0 in the DataFrame
         df.replace({'Present': 1, 'Absent': 0}, inplace=True)
+    elif dataset == 'heart':
+        print('Removing text-based descriptors from Heart dataset')
+        df = pd.read_csv("heart_data/heart.txt", skiprows=18, header=None)
+        # Replace 'Present' with 1 and 'Absent' with 0 in the DataFrame
     else:
         # Read the CSV file into a Pandas DataFrame
         df = pd.read_csv("pima_data/diabetes.csv")
@@ -18,14 +22,15 @@ def process_dataset(dataset, train_split = 0.50, validation_split = 0.25): # pre
     print(f'Datatset size: {X.shape}')
 
     # Separate positive and negative samples
-    normal_data = X[y == 0]  # Negative diagnoses
-    anomalies = X[y == 1]  # Positive diagnoses
+    normal_data = X[y == 1]  # Negative diagnoses
+    anomalies = X[y == 2]  # Positive diagnoses
     
     # randomly shuffle data 
     idx = np.random.permutation(normal_data.shape[0]) 
     normal_data = normal_data[idx] 
 
     # split dataset into train, validate test 
+    print(len(normal_data))
     num_train = int(train_split * len(normal_data))
     x_train = normal_data[:num_train]    
     num_validate = int(validation_split * len(normal_data))
