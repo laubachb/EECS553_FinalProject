@@ -20,6 +20,7 @@ cluster_assignment_description = np.load('saheart_data/saheart_clusters_descript
 # Create torch dataset objects for train and test sets using the following files:
 # - SemanticMask_Datasets.py
 list_auroc = []
+list_pr_auc = []
 for pm in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
     data_train_sm = SMDataset_withClusters(X_train, y_train, cluster_assignment, pm)
     data_train = SMDataset(X_train, y_train, pm)
@@ -48,10 +49,13 @@ for pm in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
     optimizer = optimize.Adam(net.parameters(), lr = 0.001)
     trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm, batch_size=151)  
     net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
-    auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+    auroc, pr_auc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
     list_auroc.append(auroc)
-    print(auroc)
-print(list_auroc)
+    list_pr_auc.append(pr_auc)
+    print("AUCROC(SemanticMask):", auroc)
+    print("PR-AUC(SemanticMask):", pr_auc)
+print("AUROC List: ", list_auroc)
+print("PRAUC List: ", list_pr_auc)
 # Generate and fit model with SemanticMask+Description
 # data_train_desription = SMDataset_Description(X_train, y_train, cluster_assignment_description)
 # trainloader_description = torch.utils.data.DataLoader(data_train_desription, batch_size=151) 
