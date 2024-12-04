@@ -25,7 +25,7 @@ y_valid = np.load('pima_data/y_valid_pima.npy')
 X_test = np.load('pima_data/X_test_pima.npy')   
 y_test = np.load('pima_data/y_test_pima.npy')
 cluster_assignment = np.load('pima_data/pima_clusters.npy')
-cluster_assignment_description = np.load('pima_data/pima_clusters_description.npy')
+cluster_assignment = np.load('pima_data/pima_clusters.npy')
 
 # Create torch dataset objects for train and test sets using the following files:
 # - SemanticMask_Datasets.py
@@ -65,7 +65,7 @@ validation_dataset = torch.utils.data.DataLoader(dataset=data_validation,batch_s
 # print("PR-AUC(SemanticMask+Description):", pr_auc_d)
 
 # Generate and fit model with SemanticMask+Position
-data_train_position = SMDataset_Position(X_train, y_train, cluster_assignment_description)
+data_train_position = SMDataset_Position(X_train, y_train, cluster_assignment)
 trainloader_position = torch.utils.data.DataLoader(data_train_position, batch_size=151) 
 net = train_position_pima.Encoder()
 optimizer = optimize.Adam(net.parameters(), lr = 0.001)
