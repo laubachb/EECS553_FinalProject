@@ -39,5 +39,6 @@ trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=
 print(type(data_train))
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
 
-auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
-print(auroc)
+auroc, pr_auc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print("AUCROC:", auroc)
+print("PR-AUC:", pr_auc)
