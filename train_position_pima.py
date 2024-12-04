@@ -9,20 +9,20 @@ class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(9, 128), # Hidden layer with X, input and 128 output
+            nn.Linear(8, 128), # Hidden layer with X, input and 128 output
             nn.ReLU(),  # activation function
             nn.Linear(128, 64),  # Hidden layer with 128 input, and 64 output
             nn.ReLU(),  # activation function
             )
         self.projector = nn.Sequential(
-            nn.Linear(64,9),
+            nn.Linear(64,8),
             nn.Sigmoid(),
         )
 
     def forward(self, x):
         x = self.encoder(x)  # forward propigation
         m_predict = self.projector(x)
-        return x
+        return x, m_predict
     
 
 def train_dnn_position(FF_nn,temperature,epochs, optimizer, trainloader_SCL):
