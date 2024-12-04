@@ -71,6 +71,22 @@ class SMDataset_withClusters(Dataset):
         x = [x_tilde1,x_tilde2]
         return x, y_index
 
+class SMDataset_Description(Dataset):
+    # Initialize a dataset based on X, y data and column clustered labels
+    def __init__(self, X, y, cluster_assignment):
+        self.X = torch.from_numpy(X)
+        self.X = torch.tensor(self.X, dtype=torch.float32)
+        self.y = torch.from_numpy(y)
+        self.y = torch.tensor(self.y, dtype=torch.float32)
+        self.cluster_assignment = cluster_assignment
+
+    def __len__(self):
+        return len(self.X)
+    
+    def __getitem__(self, index):
+
+        return 1
+
 class SMDataset(Dataset):
     # Initialize a dataset based on X, y 
     def __init__(self, X, y):

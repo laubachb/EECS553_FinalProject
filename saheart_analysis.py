@@ -15,10 +15,11 @@ y_valid = np.load('data/y_valid_saheart.npy')
 X_test = np.load('data/X_test_saheart.npy')   
 y_test = np.load('data/y_test_saheart.npy')
 cluster_assignment = np.load('data/saheart_clusters.npy')
+cluster_assignment_description = np.load('data/saheart_clusters_description.npy')
 
 # Create torch dataset objects for train and test sets using the following files:
 # - SemanticMask_Datasets.py
-data_train_sm = SMDataset_withClusters(X_train,y_train,cluster_assignment)
+data_train_sm = SMDataset_withClusters(X_train, y_train, cluster_assignment)
 data_train = SMDataset(X_train, y_train)
 data_test = SMDataset(X_test, y_test)
 data_validation = SMDataset(X_valid, y_valid)
@@ -32,12 +33,20 @@ validation_dataset = torch.utils.data.DataLoader(dataset=data_validation,batch_s
 # - train.py
 # - Loss.py
 
-# Generate and fit model
+# Generate and fit model with standard SemanticMask
 net = train.Encoder()
 optimizer = optimize.Adam(net.parameters(), lr = 0.001)
 trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=151)  
-print(type(data_train))
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
+auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print(auroc)
 
+# Generate and fit model with SemanticMask+Description
+data_train_desription = MyDataset_description(X_train, y_train, cluster_assignment_description)
+trainloader_description = torch.utils.data.DataLoader(data_train_desription, batch_size=151) 
+net = train.Encoder()
+optimizer = optimize.Adam(net.parameters(), lr = 0.001)
+trainloader_SemanticMask_description = torch.utils.data.DataLoader(data_train_desription, batch_size=151)  
+net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask_description)
 auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
 print(auroc)
