@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import average_precision_score
 from numpy.linalg import det
 
 
@@ -92,13 +93,13 @@ def evaluate(net,trainloader,validloader,testloader):
             total_correct += torch.sum(pred == labels).item()
 
             cm = confusion_matrix(y_true,y_pred)
-            print(cm)
+            
             accuracy = total_correct / len(testloader.dataset)
+            
+            # AUROC score 
             AUROC = roc_auc_score(y_true, distances_test)
-            #print("accuracy:",accuracy)
-            print("AUCROC:",AUROC)
-            #from imblearn.metrics import classification_report_imbalanced
-            #print(classification_report_imbalanced(y_true, y_pred, target_names=None))
        
-        
-    return AUROC
+            # AUC-PR score 
+            PR_AUC = average_precision_score(y_true, distances_test)
+            
+    return AUROC, PR_AUC
