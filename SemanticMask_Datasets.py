@@ -91,11 +91,10 @@ class SMDataset_Description(Dataset):
         cluster_assignment = self.cluster_assignment # f_label in source code
         reduced_cluster = list(set(cluster_assignment)) # f_cluster in source code
         number = len(reduced_cluster) // 2
-        x_tilde1, cluster_remain, m1 = augmentation_description(X_index, cluster_assignment, reduced_cluster, number) # cluster_remain is f_remain in source code
-        x_tilde2, cluster_remain, m2 = augmentation_description(X_index, cluster_assignment, cluster_remain, number)
+        x_tilde1, cluster_remain = augmentation_description(X_index, cluster_assignment, reduced_cluster, number) # cluster_remain is f_remain in source code
+        x_tilde2, cluster_remain = augmentation_description(X_index, cluster_assignment, cluster_remain, number)
         x = [x_tilde1,x_tilde2]
-        m = [m1, m2]
-        return x, y_index, m
+        return x, y_index
 
 class SMDataset(Dataset):
     # Initialize a dataset based on X, y 
