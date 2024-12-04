@@ -36,7 +36,7 @@ validation_dataset = torch.utils.data.DataLoader(dataset=data_validation,batch_s
 # Generate and fit model with standard SemanticMask
 net = train.Encoder()
 optimizer = optimize.Adam(net.parameters(), lr = 0.001)
-trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm,batch_size=151)  
+trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm, batch_size=151)  
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
 auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
 

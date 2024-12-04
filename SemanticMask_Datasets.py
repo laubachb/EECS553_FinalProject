@@ -3,7 +3,7 @@ import torch
 import random
 from torch.utils.data import Dataset
 
-def augmentation(x_index, cluster_assignment, reduced_cluster, number):
+def augmentation(x_index, cluster_assignment, reduced_cluster, number, prob_pert):
     # f_label = cluster_assignment
     # f_cluster = reduced_cluster
     random.shuffle(reduced_cluster)
@@ -12,7 +12,6 @@ def augmentation(x_index, cluster_assignment, reduced_cluster, number):
     mask = []
     for i in cluster:
         m_index = np.where(cluster_assignment==i)[0]
-        prob_pert=0.4 # change to modify the perturbation probability 
         m = np.random.binomial(1,prob_pert,len(m_index))>0
         m_index=m_index[m]  # select some 0's to be flipped to 1's
         mask.extend(m_index)
@@ -48,12 +47,13 @@ def augmentation_description(x_index, cluster_assignment, reduced_cluster, numbe
 
 class SMDataset_withClusters(Dataset):
     # Initialize a dataset based on X, y data and column clustered labels
-    def __init__(self, X, y, cluster_assignment):
+    def __init__(self, X, y, cluster_assignment, pm = 0.4):
         self.X = torch.from_numpy(X)
         self.X = torch.tensor(self.X, dtype=torch.float32)
         self.y = torch.from_numpy(y)
         self.y = torch.tensor(self.y, dtype=torch.float32)
         self.cluster_assignment = cluster_assignment
+        self.pm = pm
 
     def __len__(self):
         return len(self.X)
@@ -63,11 +63,12 @@ class SMDataset_withClusters(Dataset):
             index = index.tolist()
         X_index = self.X[index]
         y_index = self.y[index]
+        pm = self.pm
         cluster_assignment = self.cluster_assignment # f_label in source code
         reduced_cluster = list(set(cluster_assignment)) # f_cluster in source code
         number = len(reduced_cluster) // 2
-        x_tilde1, cluster_remain = augmentation(X_index, cluster_assignment, reduced_cluster, number) # cluster_remain is f_remain in source code
-        x_tilde2, cluster_remain = augmentation(X_index, cluster_assignment, cluster_remain, number)
+        x_tilde1, cluster_remain = augmentation(X_index, cluster_assignment, reduced_cluster, number, pm) # cluster_remain is f_remain in source code
+        x_tilde2, cluster_remain = augmentation(X_index, cluster_assignment, cluster_remain, number, pm)
         x = [x_tilde1,x_tilde2]
         return x, y_index
 
@@ -88,6 +89,7 @@ class SMDataset_Description(Dataset):
             index = index.tolist()
         X_index = self.X[index]
         y_index = self.y[index]
+        pm = self.pm
         cluster_assignment = self.cluster_assignment # f_label in source code
         reduced_cluster = list(set(cluster_assignment)) # f_cluster in source code
         number = len(reduced_cluster) // 2
@@ -98,11 +100,12 @@ class SMDataset_Description(Dataset):
 
 class SMDataset(Dataset):
     # Initialize a dataset based on X, y 
-    def __init__(self, X, y):
+    def __init__(self, X, y, pm = 0.4):
         self.X = torch.from_numpy(X)
         self.X = torch.tensor(self.X, dtype=torch.float32)
         self.y = torch.from_numpy(y)
         self.y = torch.tensor(self.y, dtype=torch.float32)
+        self.pm = pm
     
     def __len__(self):
         return len(self.X)
