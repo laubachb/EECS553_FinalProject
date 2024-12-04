@@ -2,7 +2,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 
-dataset = 'saheart' # saheart or pima 
+dataset = 'pima' # saheart or pima 
+description = True
 
 if dataset == 'saheart':
     # Define a list of column names related to health and medical data for the SAHeart dataset 
@@ -16,8 +17,10 @@ if dataset == 'saheart':
         "typea: type-A behavior",  
         "obesity",  
         "alcohol: current alcohol consumption", 
-        "age: age at onset"  
-    ]
+        "age: age at onset"]
+    if description == True:
+        column_names.insert(0, "The task is to detect if the South African has a coronary heart disease.")
+
 elif dataset == 'pima':
     # Define a list of column names related to health and medical data for the PIMA dataset
     print('Generating cluster assignemtns for the PIMA dataset')
@@ -49,4 +52,12 @@ cluster_assignment = clustering_model.labels_
 
 # Print and save the cluster assignments as a NumPy array
 print(cluster_assignment)
-#np.save('data/saheart_clusters.npy', cluster_assignment)  
+
+if dataset == 'saheart':
+    if description == True:
+        np.save('data/saheart_clusters_description.npy', cluster_assignment)  
+    else:
+        np.save('data/saheart_clusters.npy', cluster_assignment)  
+
+if dataset == 'pima':
+    np.save('pima_data/pima_clusters.npy', cluster_assignment)
