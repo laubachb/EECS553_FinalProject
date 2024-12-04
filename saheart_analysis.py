@@ -39,8 +39,9 @@ optimizer = optimize.Adam(net.parameters(), lr = 0.001)
 trainloader_SemanticMask = torch.utils.data.DataLoader(data_train_sm, batch_size=151)  
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask)
 
-auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
-
+auroc, pr_auc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print("AUCROC:", auroc)
+print("PR-AUC:", pr_auc)
 
 # Generate and fit model with SemanticMask+Description
 data_train_desription = SMDataset_Description(X_train, y_train, cluster_assignment_description)
@@ -49,5 +50,6 @@ net = train.Encoder()
 optimizer = optimize.Adam(net.parameters(), lr = 0.001)
 trainloader_SemanticMask_description = torch.utils.data.DataLoader(data_train_desription, batch_size=151)  
 net,training_loss = train.train_dnn(net,0.01,1000,optimizer,trainloader_SemanticMask_description)
-auroc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
-print(auroc)
+auroc, pr_auc = evaluation.evaluate(net, train_dataset, validation_dataset, test_dataset)
+print("AUCROC(SemanticMask+Description):", auroc)
+print("PR-AUC(SemanticMask+Description):", pr_auc)
