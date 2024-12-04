@@ -61,7 +61,7 @@ def augmentation_position(x_index, cluster_assignment, reduced_cluster, number, 
     for i in range(len(x_index)):
         if i in mask:
             augmented_x[i]=0
-    m_new = 1 * (x != augmented_x)
+    m_new = 1 * (x_index != augmented_x)
     return augmented_x, not_cluster, m_new
 
 class SMDataset_withClusters(Dataset):
@@ -129,7 +129,7 @@ class SMDataset_Position(Dataset):
     def __len__(self):
         return len(self.X)
     
-    def __getitem__(self):
+    def __getitem__(self, index):
         if torch.is_tensor(index):
             index = index.tolist()
         X_index = self.X[index]
