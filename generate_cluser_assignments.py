@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 
-dataset = 'pima' # saheart or pima 
-description = False
+dataset = 'heart' # saheart or pima 
+description = True
 
 if dataset == 'saheart':
     # Define a list of column names related to health and medical data for the SAHeart dataset 
@@ -36,6 +36,27 @@ elif dataset == 'pima':
         ]
     if description == True:
         column_names.insert(0, "The task is to predict if a patient has diabetes.")
+
+elif dataset == 'heart':
+    # Define a list of column names related to health and medical data for the PIMA dataset
+    print('Generating cluster assignemtns for the heart dataset')
+    column_names = [
+        "Age",  
+        "Sex",  
+        "ChestPainType",  
+        "RestBloodPressure",  
+        "SerumCholestoral",  
+        "FastingBloodSugar",  
+        "MaxHeartRate",  
+        "ResElectrocardiographic",  
+        "ExerciseInduced" ,  
+        "Oldpeak" ,  
+        "Slope" ,  
+        "MajorVessels" ,  
+        "Thal"
+        ]
+    if description == True:
+        column_names.insert(0, "The task is to predict if a patient has heart disease.")
 
 # Initialize the SentenceTransformer model with a pre-trained BERT model
 embedder = SentenceTransformer('bert-base-nli-stsb-mean-tokens')
