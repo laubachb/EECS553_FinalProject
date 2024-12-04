@@ -97,6 +97,32 @@ class SMDataset_Description(Dataset):
         x = [x_tilde1,x_tilde2]
         return x, y_index
 
+class SMDataset_Position(Dataset):
+
+    def __init__(self, X, y, cluster_assignment):
+        self.X = torch.from_numpy(X)
+        self.X = torch.tensor(self.X, dtype=torch.float32)
+        self.y = torch.from_numpy(y)
+        self.y = torch.tensor(self.y, dtype=torch.float32)
+        self.cluster_assignment = cluster_assignment
+
+    def __len__(self):
+        return len(self.X)
+    
+    def __getitem__(self):
+        if torch.is_tensor(index):
+            index = index.tolist()
+        X_index = self.X[index]
+        y_index = self.y[index]
+        cluster_assignment = self.cluster_assignment # f_label in source code
+        reduced_cluster = list(set(cluster_assignment)) # f_cluster in source code
+        number = len(reduced_cluster) // 2
+        x_tilde1, cluster_remain, m1 = augmentation_position(X_index, cluster_assignment, reduced_cluster, number) # cluster_remain is f_remain in source code
+        x_tilde2, cluster_remain, m2 = augmentation_position(X_index, cluster_assignment, cluster_remain, number)
+        x = [x_tilde1,x_tilde2]
+        m = [m1, m2]
+        return x, y_index, m
+
 class SMDataset(Dataset):
     # Initialize a dataset based on X, y 
     def __init__(self, X, y, pm = 0.4):
