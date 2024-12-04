@@ -23,6 +23,29 @@ def augmentation(x_index, cluster_assignment, reduced_cluster, number):
 
     return augmented_x, not_cluster
 
+def augmentation_description(x_index, cluster_assignment, reduced_cluster, number):
+    # f_label = cluster_assignment
+    # f_cluster = reduced_cluster
+    random.shuffle(reduced_cluster)
+    cluster = reduced_cluster[:number]
+    not_cluster = reduced_cluster[number:]
+    mask = []
+    for i in cluster:
+        if i == 1:
+            prob_pert=0.3
+        else:
+            prob_pert=0.5
+        m_index = np.where(cluster_assignment==i)[0]
+        m = np.random.binomial(1,prob_pert,len(m_index))>0
+        m_index=m_index[m]  # select some 0's to be flipped to 1's
+        mask.extend(m_index)
+    augmented_x = x_index.clone()
+    for i in range(len(x_index)):
+        if i in mask:
+            augmented_x[i]=0
+
+    return augmented_x, not_cluster
+
 class SMDataset_withClusters(Dataset):
     # Initialize a dataset based on X, y data and column clustered labels
     def __init__(self, X, y, cluster_assignment):
