@@ -71,8 +71,8 @@ x_values_2 = [
 # Dataset 3 (solid red line)
 saheart_truth = [
     0.668885884,
-    0.713906012,
     0.688691225,
+    0.713906012,
     0.705031487,
     0.69994672,
     0.677000977
@@ -114,12 +114,12 @@ plt.plot(
 )
 
 # Labels and title
-plt.title(r'Sensitivity Analysis of $p_m$', fontsize=20)
+# plt.title(r'Sensitivity Analysis of $p_m$', fontsize=20)
 plt.xlabel(r'$p_m$', fontsize=16)
 plt.ylabel('AUCROC', fontsize=16)
 
 # Grid and legend
-plt.legend(fontsize=10, loc='center left', bbox_to_anchor=(1, 0.5))
+plt.legend(fontsize=14, loc='center left', bbox_to_anchor=(1, 0.5))
 plt.tight_layout()
 plt.tick_params(axis='both', which='major', labelsize=14)
 
