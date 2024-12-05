@@ -4,102 +4,71 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import average_precision_score
-from numpy.linalg import det
 
 
-def get_features(model, dataloader):
-    total = 0
+def extract_features(model, dataloader):
     model.eval()
-    
-    for batch_idx, (img, label) in enumerate(dataloader):
-        # do not pass to cuda 
-        # set up the initial batch
-        if batch_idx == 0:
-            f = model(img)  # Forward pass
-            train_feature = f.detach().numpy()  # Convert to NumPy
-        # subsequent batch
-        else:
-            f = model(img)
-            train_feature = np.concatenate((train_feature, f.detach().numpy()))
-    return train_feature
+    train_features = []
 
+    with torch.no_grad():
+        for data, _ in dataloader:
+            f = model(data).detach().numpy()
+            train_features.append(f)
 
-def mahalanobis_distance(train_feature,e):
-    centerpoint = np.mean(train_feature , axis=0)  
-    p1 = e
-    p2 = centerpoint
-    # covariance matrix
-    covariance  = np.cov(train_feature, rowvar=False)
-    if det(covariance) != 0:
-        # covariance matrix power of -1
-        covariance_pm1 = np.linalg.matrix_power(covariance, -1)
-    else:
-        covariance_pm1 = np.linalg.pinv(covariance)
-    return (p1-p2).T.dot(covariance_pm1).dot(p1-p2)
+    return np.concatenate(train_features, axis=0)
 
+def mahalanobis_distance(train_features, embeddings):
+    centerpoint = np.mean(train_features, axis=0)
+    covariance = np.cov(train_features, rowvar=False)
 
-def evaluate(net,trainloader,validloader,testloader):
-    net.eval()  
-    train_feature= get_features(net,trainloader)
-    auroc_max = 0
-    with torch.no_grad():         
-        for batch_idx, (images, label) in enumerate(validloader):
-            # do not pass to cuda 
-            if batch_idx == 0:
-                embedding = net(images)
-                embedding = np.array(embedding)
-            else:
-                emb = net(images)
-                embedding = np.concatenate((embedding,np.array(emb)))
-        #print(embedding.shape)
-        distances = []
-        for e in embedding:
-            distance = mahalanobis_distance(train_feature,e)
-            distances.append(distance)
-        distances = np.array(distances)
+    # check determinant to handle singular matrix
+    if np.linalg.det(covariance) != 0:
+        covariance_inv = np.linalg.inv(covariance)
+    else: 
+        covariance_inv = np.linalg.pinv(covariance)
         
-        for batch_idx, (images, label) in enumerate(testloader):
-            # do not pass to cuda 
-            if batch_idx == 0:
-                embedding = net(images)
-                embedding = np.array(embedding)
-                labels = np.array(label)
-            else:
-                emb = net(images)
-                embedding = np.concatenate((embedding,np.array(emb)))
-                labels = np.concatenate((labels,label))
-        #print(embedding.shape)
-        distances_test = []
-        for e in embedding:
-            distance_test = mahalanobis_distance(train_feature,e)
-            distances_test.append(distance_test)
-        distances_test = np.array(distances_test)
+    diff = embeddings - centerpoint
+    return np.dot(np.dot(diff.T, covariance_inv), diff)
+    
+    
+def evaluate(model, trainloader, validloader, testloader):
+    model.eval()
 
-        for percentile in range(85,86):
-            y_true = []
-            y_pred = []
-            total_correct = 0
-            #print("percentile:",percentile)
-            cutoff = np.percentile(distances,percentile)
-            pred = distances_test > cutoff
-            pred = pred.astype(int)
-            for i in labels:
-                y_true.append(i.item())
-            for i in pred:
-                y_pred.append(i.item())
-            pred = torch.tensor(pred)
-            
-            labels = torch.tensor(labels)
-            total_correct += torch.sum(pred == labels).item()
+    # extract training data features
+    train_features = extract_features(model, trainloader)
 
-            cm = confusion_matrix(y_true,y_pred)
-            
-            accuracy = total_correct / len(testloader.dataset)
-            
-            # AUROC score 
-            AUROC = roc_auc_score(y_true, distances_test)
-       
-            # AUC-PR score 
-            PR_AUC = average_precision_score(y_true, distances_test)
-            
+    # extract validation data features
+    valid_features = extract_features(model, validloader)
+    distances = np.array([mahalanobis_distance(train_features, e) for e in valid_features])
+    
+    # extract test data features
+    test_features = []
+    labels = []
+
+    with torch.no_grad():
+        for test_data, label in testloader:
+            f = model(test_data).detach().numpy()
+            test_features.append(f)
+            labels.extend(label.numpy())
+
+    test_features = np.concatenate(test_features, axis=0)
+    labels = np.array(labels)
+    test_distances = np.array([mahalanobis_distance(train_features, e) for e in test_features])
+
+    # Calculate metrics
+    percentile = 85
+    cutoff = np.percentile(distances, percentile)
+    y_pred = (test_distances > cutoff).astype(int)
+
+    accuracy = np.sum(y_pred == labels) / len(labels)
+    cm = confusion_matrix(labels, y_pred)
+    AUROC = roc_auc_score(labels, test_distances)
+    PR_AUC = average_precision_score(labels, test_distances)
+
     return AUROC, PR_AUC
+    
+    
+    
+    
+    
+    
