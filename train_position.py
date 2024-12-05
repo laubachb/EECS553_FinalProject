@@ -22,8 +22,7 @@ class Encoder(nn.Module):
     def forward(self, x):
         x = self.encoder(x)  # forward propigation
         m_predict = self.projector(x)
-        return x
-    
+        return x, m_predict
 
 def train_dnn_position(FF_nn,temperature,epochs, optimizer, trainloader_SCL):
     FF_nn.train()
